@@ -80,11 +80,9 @@ switch (command) {
   .then(function (response) {
 
     var data = response.data;
-   console.log(response.data);
     data.forEach(element => {
         console.log("Venue Name: "+element.venue.name);
         console.log("Venue City: "+element.venue.city);
-        console.log("Venue Region: "+element.venue.region);
         var date =  moment(element.datetime).format('MM-DD-YYYY');
         console.log("Event Date: "+ date);
         console.log("<--------------------------------------------->");
