@@ -5,6 +5,8 @@ var Spotify = require('node-spotify-api');
 const axios = require('axios');
 var moment = require('moment');
 var fs = require('fs');
+const chalk = require('chalk');
+
 
 //console.log(keys);
 
@@ -92,7 +94,6 @@ function runTool(command,urlFriendlyCommandVar){
             }
         }
     }else{
-        console.log(commandString);
         commandString += commandArray[0];
     }
     return commandString;
@@ -105,14 +106,14 @@ function runTool(command,urlFriendlyCommandVar){
 
     var data = response.data;
     if(data.length <= 0){
-        console.log("Sorry nothing found!");
+        console.log(chalk.yellow("Sorry nothing found!"));
     }else{
         data.forEach(element => {
-            console.log("Venue Name: "+element.venue.name);
-            console.log("Venue City: "+element.venue.city);
+            console.log(chalk.green.bold("Venue Name: ")+chalk.green(element.venue.name));
+            console.log(chalk.green.bold("Venue City: ")+chalk.green(element.venue.city));
             var date =  moment(element.datetime).format('MM-DD-YYYY');
-            console.log("Event Date: "+ date);
-            console.log("<--------------------------------------------->");
+            console.log(chalk.green.bold("Event Date: ")+ chalk.green(date));
+            console.log(chalk.magenta.bold("<--------------------------------------------->"));
         });
     
     }
@@ -120,7 +121,7 @@ function runTool(command,urlFriendlyCommandVar){
     
   })
   .catch(function (error) {
-    console.log(error);
+    console.log(chalk.red(error));
   });
   }
 
@@ -132,15 +133,15 @@ function runTool(command,urlFriendlyCommandVar){
     }
     spotify.search({ type: 'track', query: trackOrArtistString }, function(err, data) {
         if (err) {
-          return console.log('Error occurred: ' + err);
+          return console.log(chalk.red('Error occurred: ' + err));
         }
         var spotifyArray = data.tracks.items;
         spotifyArray.forEach(element => {
-            console.log("<-------------------------------------------------------------------------------------------------->");
-            console.log("Album Name: "+element.album.name);
-            console.log("Artist Name: "+element.artists[0].name); 
-            console.log("Song Name: "+element.name); 
-            console.log("Spotify Link: " + element.external_urls.spotify);
+            console.log(chalk.cyan.bold("<-------------------------------------------------------------------------------------------------->"));
+            console.log(chalk.green.bold("Album Name: ")+chalk.green(element.album.name));
+            console.log(chalk.green.bold("Artist Name: ")+chalk.green(element.artists[0].name)); 
+            console.log(chalk.green.bold("Song Name: ")+chalk.green(element.name)); 
+            console.log(chalk.green.bold("Spotify Link: ")+chalk.green(element.external_urls.spotify));
 
         });
 
@@ -155,26 +156,25 @@ function runTool(command,urlFriendlyCommandVar){
     }
     axios.get(OMDB_API_BASE+OMDB_API_KEY+movieNameString)
     .then(function (response){
-       // console.log(response.data);
         var movie =  response.data;
-        console.log("Title: "+movie.Title);
-        console.log("Year: "+movie.Year);
-        console.log("IMDB Rating: "+movie.imdbRating);
+        console.log(chalk.blue.bold("Title: ")+chalk.blue(movie.Title));
+        console.log(chalk.blue.bold("Year: ")+chalk.blue(movie.Year));
+        console.log(chalk.blue.bold("IMDB Rating: ")+chalk.blue(movie.imdbRating));
         if(movie.Ratings.length >=2){
-            console.log("Rotten Tomatoes: "+movie.Ratings[1].Value);
+            console.log(chalk.blue.bold("Rotten Tomatoes: ")+chalk.blue(movie.Ratings[1].Value));
         }else{
-            console.log("Rotten Tomatoes rating is not available");
+            console.log(chalk.blue.bold("Rotten Tomatoes rating is not available"));
         }
         
-        console.log("Country: "+movie.Country);
-        console.log("Language: "+movie.Language);
-        console.log("Plot: "+movie.Plot);
-        console.log("Actors: "+movie.Actors);
+        console.log(chalk.blue.bold("Country: ")+chalk.blue(movie.Country));
+        console.log(chalk.blue.bold("Language: ")+chalk.blue(movie.Language));
+        console.log(chalk.blue.bold("Plot: ")+chalk.blue(movie.Plot));
+        console.log(chalk.blue.bold("Actors: ")+chalk.blue(movie.Actors));
 
         
     })
     .catch(function(error){
-        console.log(error);
+        console.log(chalk.red(error));
     });
 
   }
@@ -183,11 +183,11 @@ function runTool(command,urlFriendlyCommandVar){
   function doWhatItSays(){
     fs.readFile('./random.txt', 'utf8', function(error, data){
         if(error){
-            return console.log("Whoops looks like there was an error with random.txt");
+            return console.log(chalk.red("Whoops looks like there was an error with random.txt"));
         }
         var splitData = data.split(',');
             if(splitData[0] == DO_WHAT_IT_SAYS){
-                return console.log("Error: The file contains the command "+DO_WHAT_IT_SAYS);
+                return console.log(chalk.red("Error: The file contains the command "+DO_WHAT_IT_SAYS));
             }else{
                 var command = splitData[0];
                 var splitVar = splitData[0+1].replace(/"/gi,'').split(" ");
@@ -216,7 +216,7 @@ function runTool(command,urlFriendlyCommandVar){
   }
 
   function userErrorMessage(){
-      console.log("I am sorry, I only understand the following commands:\n1: "+SPOTIFY_THIS_SONG+" <SONG NAME> (If no song name, I default to 'Ace of Base')\n2: " +MOVIE_THIS+" <MOVIE NAME> (If no movie name, I default to 'Mr.Nobody')\n3: "+CONCERT_THIS+" <BAND NAME> (No default, you MUST include a band)\n4: "+ DO_WHAT_IT_SAYS);
+      console.log(chalk.red( "I am sorry, I only understand the following commands:\n1: "+SPOTIFY_THIS_SONG+" <SONG NAME> (If no song name, I default to 'Ace of Base')\n2: " +MOVIE_THIS+" <MOVIE NAME> (If no movie name, I default to 'Mr.Nobody')\n3: "+CONCERT_THIS+" <BAND NAME> (No default, you MUST include a band)\n4: "+ DO_WHAT_IT_SAYS));
 
   }
 
