@@ -24,40 +24,41 @@ const BANDS_IN_TOWN_API_KEY = "/events?app_id=codingbootcamp";
 const OMDB_API_BASE ="http://www.omdbapi.com/";
 const OMDB_API_KEY = "?apikey=" +keys.apiKeys.omdbKey+"&t=";
 
-//http://www.omdbapi.com/?apikey=6f88e0ad&t=Back+to+the+future
 
 
 // User input
 var command = process.argv[2];
-var commandVar = getUserVar();
-runTool(command,unPackCommandVar(commandVar));
+if(process.argv.length <= 2){
+    userErrorMessage();
+}else if(command == CONCERT_THIS && process.argv.length == 3){
+    userErrorMessage();
+
+}else{
+    var commandVar = getUserVar();
+    runTool(command,unPackCommandVar(commandVar));
+}
 
 function runTool(command,urlFriendlyCommandVar){
     switch (command) {
         case CONCERT_THIS:
-        console.log("concert");
          concerThis(urlFriendlyCommandVar);
                
             break; 
         case SPOTIFY_THIS_SONG:
-        console.log("spot");
             spotifyThis(urlFriendlyCommandVar);
     
             break; 
         case MOVIE_THIS:
-        console.log("movie");
             movieThis(urlFriendlyCommandVar);
     
             break;
     
         case DO_WHAT_IT_SAYS:
-        console.log("do it");
             doWhatItSays();
             break;
     
         default: 
-        console.log(command + " "+urlFriendlyCommandVar);
-        console.log("no match");
+        userErrorMessage();
 
 
           
@@ -99,7 +100,6 @@ function runTool(command,urlFriendlyCommandVar){
   //BANDS IN TOWN
   function concerThis(bandOrSongString){
      
-    //console.log(BANDS_IN_TOWN_API_BASE + bandOrSongString + BANDS_IN_TOWN_API_KEY);
     axios.get(BANDS_IN_TOWN_API_BASE + bandOrSongString + BANDS_IN_TOWN_API_KEY)
   .then(function (response) {
 
@@ -130,7 +130,6 @@ function runTool(command,urlFriendlyCommandVar){
     if (trackOrArtistString == "" || trackOrArtistString == "undefined"){
         trackOrArtistString = "Ace of Base The Sign";
     }
-    console.log("This is what I am passing "+ trackOrArtistString);
     spotify.search({ type: 'track', query: trackOrArtistString }, function(err, data) {
         if (err) {
           return console.log('Error occurred: ' + err);
@@ -151,8 +150,9 @@ function runTool(command,urlFriendlyCommandVar){
 
   //OMDB
   function movieThis(movieNameString){
-      console.log("Im in movie this");
-    console.log(OMDB_API_BASE+OMDB_API_KEY+movieNameString);
+    if (movieNameString == "" || movieNameString == "undefined"){
+        movieNameString = "Mr. Nobody";
+    }
     axios.get(OMDB_API_BASE+OMDB_API_KEY+movieNameString)
     .then(function (response){
        // console.log(response.data);
@@ -186,7 +186,6 @@ function runTool(command,urlFriendlyCommandVar){
             return console.log("Whoops looks like there was an error with random.txt");
         }
         var splitData = data.split(',');
-            console.log(splitData.length);
             if(splitData[0] == DO_WHAT_IT_SAYS){
                 return console.log("Error: The file contains the command "+DO_WHAT_IT_SAYS);
             }else{
@@ -213,6 +212,11 @@ function runTool(command,urlFriendlyCommandVar){
     });
 
     
+
+  }
+
+  function userErrorMessage(){
+      console.log("I am sorry, I only understand the following commands:\n1: "+SPOTIFY_THIS_SONG+" <SONG NAME> (If no song name, I default to 'Ace of Base')\n2: " +MOVIE_THIS+" <MOVIE NAME> (If no movie name, I default to 'Mr.Nobody')\n3: "+CONCERT_THIS+" <BAND NAME> (No default, you MUST include a band)\n4: "+ DO_WHAT_IT_SAYS);
 
   }
 
