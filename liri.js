@@ -5,6 +5,8 @@ var Spotify = require('node-spotify-api');
 const axios = require('axios');
 var moment = require('moment');
 
+//console.log(keys);
+
 
 
 //Command line variables
@@ -16,6 +18,13 @@ const DO_WHAT_IT_SAYS = "do-what-it-says";
 //Bands in town API (artist goes in the middle)
 const BANDS_IN_TOWN_API_BASE = "https://rest.bandsintown.com/artists/";
 const BANDS_IN_TOWN_API_KEY = "/events?app_id=codingbootcamp";
+
+//OMDB API
+const OMDB_API_BASE ="http://www.omdbapi.com/";
+const OMDB_API_KEY = "?apikey=" +keys.apiKeys.omdbKey+"&t=";
+
+http://www.omdbapi.com/?apikey=6f88e0ad&t=Back+to+the+future
+
 
 // User input
 var command = process.argv[2];
@@ -31,6 +40,7 @@ switch (command) {
 
         break; 
     case MOVIE_THIS:
+        movieThis(unPackCommandVar(commandVar));
 
         break;
 
@@ -75,19 +85,24 @@ switch (command) {
   //BANDS IN TOWN
   function concerThis(bandOrSongString){
      
-    console.log(BANDS_IN_TOWN_API_BASE + bandOrSongString + BANDS_IN_TOWN_API_KEY);
+    //console.log(BANDS_IN_TOWN_API_BASE + bandOrSongString + BANDS_IN_TOWN_API_KEY);
     axios.get(BANDS_IN_TOWN_API_BASE + bandOrSongString + BANDS_IN_TOWN_API_KEY)
   .then(function (response) {
 
     var data = response.data;
-    data.forEach(element => {
-        console.log("Venue Name: "+element.venue.name);
-        console.log("Venue City: "+element.venue.city);
-        var date =  moment(element.datetime).format('MM-DD-YYYY');
-        console.log("Event Date: "+ date);
-        console.log("<--------------------------------------------->");
-    });
-
+    if(data.length <= 0){
+        console.log("Sorry nothing found!");
+    }else{
+        data.forEach(element => {
+            console.log("Venue Name: "+element.venue.name);
+            console.log("Venue City: "+element.venue.city);
+            var date =  moment(element.datetime).format('MM-DD-YYYY');
+            console.log("Event Date: "+ date);
+            console.log("<--------------------------------------------->");
+        });
+    
+    }
+   
     
   })
   .catch(function (error) {
@@ -97,7 +112,7 @@ switch (command) {
 
   //SPOTIFY
   function spotifyThis(trackOrArtistString){
-    var spotify = new Spotify(keys.spotify);
+    var spotify = new Spotify(keys.apiKeys.spotify);
     if (trackOrArtistString == "" || trackOrArtistString == "undefined"){
         trackOrArtistString = "Ace of Base The Sign";
     }
@@ -106,9 +121,6 @@ switch (command) {
         if (err) {
           return console.log('Error occurred: ' + err);
         }
-
-    
-
         var spotifyArray = data.tracks.items;
         spotifyArray.forEach(element => {
             console.log("<-------------------------------------------------------------------------------------------------->");
@@ -123,48 +135,33 @@ switch (command) {
       });
   }
 
+  //OMDB
+  function movieThis(movieNameString){
+    console.log(OMDB_API_BASE+OMDB_API_KEY+movieNameString);
+    axios.get(OMDB_API_BASE+OMDB_API_KEY+movieNameString)
+    .then(function (response){
+       // console.log(response.data);
+        var movie =  response.data;
+        console.log("Title: "+movie.Title);
+        console.log("Year: "+movie.Year);
+        console.log("IMDB Rating: "+movie.imdbRating);
+        if(movie.Ratings.length >=2){
+            console.log("Rotten Tomatoes: "+movie.Ratings[1].Value);
+        }else{
+            console.log("Rotten Tomatoes rating is not available");
+        }
+        
+        console.log("Country: "+movie.Country);
+        console.log("Language: "+movie.Language);
+        console.log("Plot: "+movie.Plot);
+        console.log("Actors: "+movie.Actors);
+
+        
+    })
+    .catch(function(error){
+        console.log(error);
+    });
+
+  }
+
   
-//   { album:
-//     { album_type: 'album',
-//       artists: [ [Object] ],
-//       available_markets:
-//        [ 'AD',  
-//          'ZA' ],
-//       external_urls:
-//        { spotify: 'https://open.spotify.com/album/3nduqOkFEshUlTzpv3HGyP' },
-//       href: 'https://api.spotify.com/v1/albums/3nduqOkFEshUlTzpv3HGyP',
-//       id: '3nduqOkFEshUlTzpv3HGyP',
-//       images: [ [Object], [Object], [Object] ],
-//       name: 'Boob Ranch: Lullaby renditions of Blink 182 songs',
-//       release_date: '2014',
-//       release_date_precision: 'year',
-//       total_tracks: 10,
-//       type: 'album',
-//       uri: 'spotify:album:3nduqOkFEshUlTzpv3HGyP' },
-//    artists:
-//     [ { external_urls: [Object],
-//         href: 'https://api.spotify.com/v1/artists/2VURgzr9TpBmYJEqU25RUw',
-//         id: '2VURgzr9TpBmYJEqU25RUw',
-//         name: 'Sparrow Sleeps',
-//         type: 'artist',
-//         uri: 'spotify:artist:2VURgzr9TpBmYJEqU25RUw' } ],
-//    available_markets:
-//     [ 'AD',
-    
-//       'ZA' ],
-//    disc_number: 1,
-//    duration_ms: 245263,
-//    explicit: false,
-//    external_ids: { isrc: 'QM-4NN-15-10063' },
-//    external_urls:
-//     { spotify: 'https://open.spotify.com/track/0dqJ9yOWOwlNSBPvTb5Jh7' },
-//    href: 'https://api.spotify.com/v1/tracks/0dqJ9yOWOwlNSBPvTb5Jh7',
-//    id: '0dqJ9yOWOwlNSBPvTb5Jh7',
-//    is_local: false,
-//    name: 'All the Small Things',
-//    popularity: 18,
-//    preview_url:
-//     'https://p.scdn.co/mp3-preview/322d406888fb9a502339dcce81d104f1d1faa230?cid=99a2728ca7c64848ab2b64c2b833a231',
-//    track_number: 3,
-//    type: 'track',
-//    uri: 'spotify:track:0dqJ9yOWOwlNSBPvTb5Jh7' }
