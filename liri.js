@@ -4,6 +4,7 @@ var keys = require("./keys.js");
 var Spotify = require('node-spotify-api');
 const axios = require('axios');
 var moment = require('moment');
+var fs = require('fs');
 
 //console.log(keys);
 
@@ -23,33 +24,46 @@ const BANDS_IN_TOWN_API_KEY = "/events?app_id=codingbootcamp";
 const OMDB_API_BASE ="http://www.omdbapi.com/";
 const OMDB_API_KEY = "?apikey=" +keys.apiKeys.omdbKey+"&t=";
 
-http://www.omdbapi.com/?apikey=6f88e0ad&t=Back+to+the+future
+//http://www.omdbapi.com/?apikey=6f88e0ad&t=Back+to+the+future
 
 
 // User input
 var command = process.argv[2];
 var commandVar = getUserVar();
+runTool(command,unPackCommandVar(commandVar));
 
-switch (command) {
-    case CONCERT_THIS:
-     concerThis(unPackCommandVar(commandVar));
-           
-        break; 
-    case SPOTIFY_THIS_SONG:
-        spotifyThis(unPackCommandVar(commandVar));
+function runTool(command,urlFriendlyCommandVar){
+    switch (command) {
+        case CONCERT_THIS:
+        console.log("concert");
+         concerThis(urlFriendlyCommandVar);
+               
+            break; 
+        case SPOTIFY_THIS_SONG:
+        console.log("spot");
+            spotifyThis(urlFriendlyCommandVar);
+    
+            break; 
+        case MOVIE_THIS:
+        console.log("movie");
+            movieThis(urlFriendlyCommandVar);
+    
+            break;
+    
+        case DO_WHAT_IT_SAYS:
+        console.log("do it");
+            doWhatItSays();
+            break;
+    
+        default: 
+        console.log(command + " "+urlFriendlyCommandVar);
+        console.log("no match");
 
-        break; 
-    case MOVIE_THIS:
-        movieThis(unPackCommandVar(commandVar));
 
-        break;
+          
+    }
+}
 
-    case DO_WHAT_IT_SAYS:
-        break;
-
-    default: 
-      
-  }
 
   //get user info, can be used for all commands, helps with multiple variables after command 
   //ASSUMES COMMAND IS ALWAYS ONE WORD
@@ -137,6 +151,7 @@ switch (command) {
 
   //OMDB
   function movieThis(movieNameString){
+      console.log("Im in movie this");
     console.log(OMDB_API_BASE+OMDB_API_KEY+movieNameString);
     axios.get(OMDB_API_BASE+OMDB_API_KEY+movieNameString)
     .then(function (response){
@@ -161,6 +176,43 @@ switch (command) {
     .catch(function(error){
         console.log(error);
     });
+
+  }
+
+  //Do What It Says - File Read
+  function doWhatItSays(){
+    fs.readFile('./random.txt', 'utf8', function(error, data){
+        if(error){
+            return console.log("Whoops looks like there was an error with random.txt");
+        }
+        var splitData = data.split(',');
+            console.log(splitData.length);
+            if(splitData[0] == DO_WHAT_IT_SAYS){
+                return console.log("Error: The file contains the command "+DO_WHAT_IT_SAYS);
+            }else{
+                var command = splitData[0];
+                var splitVar = splitData[0+1].replace(/"/gi,'').split(" ");
+                runTool(command,unPackCommandVar(splitVar));
+
+            }
+
+            //TRIED LOOPING THROUGH FILE, NOT WORKING
+            // for(var i=0;i<splitData.length;i+=2){
+            //     console.log(i);
+            //     if(splitData[i] == DO_WHAT_IT_SAYS){
+            //         return console.log("Error: The file contains the command "+DO_WHAT_IT_SAYS);
+            //     }else{
+            //         var command = splitData[i];
+            //         var splitCommand = splitData[i+1].replace(/"/gi,'').split(" ");
+            //         console.log(command);
+            //         console.log(unPackCommandVar(splitCommand));
+            //        runTool(command,unPackCommandVar(splitCommand));
+                    
+            //     }
+            //  }
+    });
+
+    
 
   }
 
